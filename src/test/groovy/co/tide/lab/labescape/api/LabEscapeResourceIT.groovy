@@ -4,6 +4,7 @@ import co.tide.lab.labescape.LabEscapeApplication
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import spock.lang.Specification
 
@@ -17,7 +18,7 @@ class LabEscapeResourceIT extends Specification {
     @Value('http://localhost:${local.server.port}/lab/escape?lab={lab}&startX={startX}&startY={startY}')
     def subjectEndpoint
 
-    def "Test rest service works correctly"() {
+    def "Draw path API finds existing path"() {
 
         given:
         def labToSolve =
@@ -46,5 +47,28 @@ class LabEscapeResourceIT extends Specification {
                   |O OOOOOOOO
                   |O        O
                   |OOOOOOOOOO""".stripMargin()
+    }
+
+    def "Not found when no escape"() {
+
+        given:
+        def labToSolve =
+                """OOOOOOOOOO
+                  |O    O   O
+                  |O OO O O O
+                  |O  O O O O
+                  |O OO   O O
+                  |O OOOOOOOO
+                  |O        O
+                  |OOOOOOOOOO""".stripMargin()
+        def x = 3
+        def y = 1
+
+        when:
+        restTemplate.getForEntity(subjectEndpoint, String.class, [lab: labToSolve, startX: x, startY: y]);
+
+        then:
+        HttpClientErrorException ex = thrown()
+        ex.statusCode == HttpStatus.NOT_FOUND
     }
 }

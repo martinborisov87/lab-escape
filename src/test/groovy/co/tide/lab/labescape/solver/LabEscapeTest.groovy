@@ -1,5 +1,8 @@
 package co.tide.lab.labescape.solver
 
+import co.tide.lab.labescape.exception.InvalidLabyrinthException
+import co.tide.lab.labescape.exception.InvalidStartingPositionException
+import co.tide.lab.labescape.exception.NoEscapeException
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -74,7 +77,7 @@ class LabEscapeTest extends Specification {
         lab[0][0] == FREE
     }
 
-    def "Draw escape path if such exists"() {
+    def "Draw escape path if one exists"() {
 
         given:
         char[][] labyrinthToSolve = [
@@ -106,5 +109,115 @@ class LabEscapeTest extends Specification {
                 [WALL, FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE, WALL],
                 [WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]
         ]
+    }
+
+    def "Escape from above if path exists"() {
+
+        given:
+        char[][] lab = [
+                [WALL, FREE, WALL, WALL],
+                [WALL, FREE, FREE, WALL],
+                [WALL, FREE, FREE, WALL],
+                [WALL, WALL, WALL, WALL]
+        ]
+
+        when:
+        def escape = subject.drawPathForEscape(lab, 1, 1)
+
+        then:
+        escape == [
+                [WALL, PATH, WALL, WALL],
+                [WALL, PATH, FREE, WALL],
+                [WALL, FREE, FREE, WALL],
+                [WALL, WALL, WALL, WALL]
+        ]
+    }
+
+    def "Escape from bottom if path exists"() {
+
+        given:
+        char[][] lab = [
+                [WALL, WALL, WALL, WALL],
+                [WALL, FREE, FREE, WALL],
+                [WALL, FREE, WALL, WALL],
+                [WALL, FREE, WALL, WALL]
+        ]
+
+        when:
+        def escape = subject.drawPathForEscape(lab, 1, 2)
+
+        then:
+        escape == [
+                [WALL, WALL, WALL, WALL],
+                [WALL, PATH, PATH, WALL],
+                [WALL, PATH, WALL, WALL],
+                [WALL, PATH, WALL, WALL]
+        ]
+    }
+
+    def "Escape from left if path exists"() {
+
+        given:
+        char[][] lab = [
+                [WALL, WALL, WALL, WALL],
+                [FREE, FREE, FREE, WALL],
+                [WALL, WALL, FREE, WALL],
+                [WALL, WALL, WALL, WALL]
+        ]
+
+        when:
+        def escape = subject.drawPathForEscape(lab, 2, 2)
+
+        then:
+        escape == [
+                [WALL, WALL, WALL, WALL],
+                [PATH, PATH, PATH, WALL],
+                [WALL, WALL, PATH, WALL],
+                [WALL, WALL, WALL, WALL]
+        ]
+    }
+
+    def "If no escape found raise no escape exception"() {
+
+        given:
+        char[][] lab = [
+                [WALL, WALL, WALL, WALL],
+                [WALL, FREE, FREE, WALL],
+                [WALL, FREE, FREE, WALL],
+                [WALL, WALL, WALL, WALL]
+        ]
+
+        when:
+        subject.drawPathForEscape(lab, 1, 1)
+
+        then:
+        NoEscapeException ex = thrown()
+    }
+
+    def "If the starting point is on a wall raise invalid starting point exception"() {
+
+        given:
+        char[][] lab = [[WALL]]
+
+        when:
+        subject.drawPathForEscape(lab, 0, 0)
+
+        then:
+        InvalidStartingPositionException ex = thrown()
+    }
+
+    def "If lab less than 4 by 4 raise an illegal exception"() {
+
+        given:
+        char[][] lab = [
+                [FREE, FREE, FREE],
+                [FREE, FREE, FREE]
+        ]
+
+        when:
+        subject.drawPathForEscape(lab, 0, 0)
+
+        then:
+        InvalidLabyrinthException ex = thrown()
     }
 }

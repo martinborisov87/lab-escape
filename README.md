@@ -1,3 +1,12 @@
+To build the application (while in the directory where the pom.xml is):
+mvn clean install
+
+To run the application on port 8080:
+java -jar ./target/lab-escape-0.0.1-SNAPSHOT.jar
+
+The rest API is then accessible like:
+/lab/escape?lab={lab}&startX={startX}&startY={startY}
+
 Example input
 
 	OOOOOOOOOO

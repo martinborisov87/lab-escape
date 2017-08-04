@@ -1,5 +1,7 @@
 package co.tide.lab.labescape.solver;
 
+import co.tide.lab.labescape.exception.InvalidLabyrinthException;
+import co.tide.lab.labescape.exception.InvalidStartingPositionException;
 import co.tide.lab.labescape.exception.NoEscapeException;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ public class LabEscape {
     public static final char FREE = ' ';
     public static final char PATH = '•';
 
+    private static final int LAB_MIN_SIZE = 4;
+
     /**
      * @param labyrinth A labyrinth drawn on a matrix of characters. It's at least 4x4, can be a rectangle or a square.
      *                  Walkable areas are represented with a space character, walls are represented with a big O character.
@@ -23,6 +27,13 @@ public class LabEscape {
      * @throws NoEscapeException when no path exists to the outside, from the selected starting point
      */
     public char[][] drawPathForEscape(char[][] labyrinth, int startX, int startY) throws NoEscapeException {
+        if (labyrinth[startX][startY] == WALL) {
+            throw new InvalidStartingPositionException();
+        }
+        if (labyrinth.length < LAB_MIN_SIZE || labyrinth[0].length < LAB_MIN_SIZE) {
+            throw new InvalidLabyrinthException();
+        }
+
         boolean[][] visited = new boolean[labyrinth.length][labyrinth[0].length];
 
         placeIn(startX, startY, labyrinth, visited);
